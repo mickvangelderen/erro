@@ -40,7 +40,7 @@ if (value.length > max) {
 }
 ```
 
-Combining all of the above is possible. The {} substring will take the next argument starting after the format string, each time it is used. The {number} will pick the number-th argument after the format string (`arguments[number + 1]`). The {property} will always try to read the property from the first argument after the format string (`arguments[1]`). If the value for a {...} can't be found, it will be left as is.
+Combining all of the above is possible. The {} substring will take the next argument starting after the format string, each time it is used (`arguments[i++]` with initially `i = 1`). The {number} will pick the number-th argument after the format string (`arguments[number + 1]`). The {property} will always try to read the property from the first argument after the format string (`arguments[1][property]`). If the value for a {...} can't be found, it will be left as is.
 
 With this information we can construct the following erro:
 
