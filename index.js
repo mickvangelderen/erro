@@ -1,1 +1,1 @@
-module.exports = require('lib/erro');
+module.exports = require('./lib/erro');
