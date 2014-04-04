@@ -1,6 +1,6 @@
 {
   "name": "erro",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple error message generator",
   "main": "index.js",
   "scripts": {
@@ -22,8 +22,7 @@
     "url": "https://github.com/mickvangelderen/erro/issues"
   },
   "homepage": "https://github.com/mickvangelderen/erro",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "grunt-simple-mocha": "~0.4.0",
     "grunt": "~0.4.4",
