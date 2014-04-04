@@ -49,4 +49,4 @@ erro('{} {0} {} {} {2} {hello} {} {}', {hello: 'world'}, 'two', 'three', 4)
 // message: '{"hello":"world"} {"hello":"world"} "two" "three" "three" "world" 4 {}'
 ```
 
-Check the tests for more examples
+Check the [tests](https://github.com/mickvangelderen/erro/blob/master/test/erro-test.js) for more examples
