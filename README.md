@@ -1,52 +1,47 @@
 Erro
 ====
 
-Simple error message generation
+Create `lib/er.js` in your module with the following contents:
 
 ```js
-var erro = require('erro'),
-    value = 'mrbiggles',
-    max = 4;
+var erro = require('erro');
 
-if (value.length > max) {
-	throw erro('Expected the length of {} to be smaller than {}', value, max);
-	// message: Expected the length of "mrbiggles" to be smaller than 4
+/* This method allows multiple parts of a module use different error objects with different parsers */
+var er = module.exports = erro();
+
+/* er.create returns a function that creates error objects with the given key. Here we attach those functions to the er object but you can do whatever you want with them. */
+er.notFound = er.create('not-found');
+er.invalidArguments = er.create('invalid-arguments');
+```
+
+Include `lib/er.js` when you need to create error objects: 
+
+```js
+var er = require('./er');
+
+module.exports = function divide(a, b) {
+    if (b === 0) {
+        throw er.invalidArguments('Cannot divide :a by :b', { a: a, b: b };
+    }
+    return a/b;
 }
 ```
 
-You can reuse values passed to `erro` by using an index
+You can use nested objects just as easily:
 
 ```js
-var erro = require('erro'),
-    value = 'mrbiggles',
-    max = 4;
+var er = require('./er');
 
-if (value.length > max) {
-	throw erro('Expected the length of {0} to be smaller than {1}, make sure {0} becomes smaller!', value, max);
-	// message: 'Expected the length of "mrbiggles" to be smaller than 4, make sure "mrbiggles" becomes smaller!'
+var user = { name: mick, id: 5 };
+
+module.exports = function getUserProperty(prop) {
+    if (!(prop in user)) {
+        throw er.notFound('Property :p is not found for user :u.name', {
+            p: prop, u: user
+        });
+    }
+    return user[prop];
 }
 ```
 
-If you want to make the error messages even more readable you can use an object like so:
-
-```js
-var erro = require('erro'),
-    value = 'mrbiggles',
-    max = 4;
-
-if (value.length > max) {
-	throw erro('Expected the length of {value} to be smaller than {max}, make sure {value} becomes smaller!', {value: value, max: max});
-	// message: 'Expected the length of "mrbiggles" to be smaller than 4, make sure "mrbiggles" becomes smaller!'
-}
-```
-
-Combining all of the above is possible. The {} substring will take the next argument starting after the format string, each time it is used (`arguments[i++]` with initially `i = 1`). The {number} will pick the number-th argument after the format string (`arguments[number + 1]`). The {property} will always try to read the property from the first argument after the format string (`arguments[1][property]`). If the value for a {...} can't be found, it will be left as is.
-
-With this information we can construct the following erro:
-
-```js
-erro('{} {0} {} {} {2} {hello} {} {}', {hello: 'world'}, 'two', 'three', 4)
-// message: '{"hello":"world"} {"hello":"world"} "two" "three" "three" "world" 4 {}'
-```
-
-Check the [tests](https://github.com/mickvangelderen/erro/blob/master/test/erro-test.js) for more examples
+You can also specify your own key pattern by providing options to the `erro` function. Check the [tests](https://github.com/mickvangelderen/erro/blob/master/test/erro-test.js) to see how this and other things work. 

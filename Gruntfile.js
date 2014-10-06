@@ -5,9 +5,7 @@ grunt.initConfig({
 		simplemocha_watch: {
 			files: ['!**/node_modules/**', '**/*.js'],
 			tasks: ['simplemocha:watch'],
-			options: {
-				atBegin: true
-			}
+			options: { atBegin: true }
 		}
 	},
 	simplemocha: {
@@ -15,19 +13,15 @@ grunt.initConfig({
 			src: ['test/**/*.js'],
 			options: {
 				globals: [],
-				// timeout: 2000,
 				ignoreLeaks: false,
-				// grep: '*-test',
-				// ui: 'bdd',
+				bail: true,
 				reporter: 'min'
 			}
 		}
 	}
 });
 
-// For this to work, you need to have run `npm install grunt-simple-mocha`
 grunt.loadNpmTasks('grunt-simple-mocha');
 grunt.loadNpmTasks('grunt-contrib-watch');
 
-// Add a default task. This is optional, of course :)
 grunt.registerTask('default', 'watch:simplemocha_watch');
