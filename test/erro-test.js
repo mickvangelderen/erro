@@ -85,6 +85,18 @@ describe('erro', function() {
 				data: { user: { email: 'mick@example.com' }}
 			});
 		});
+
+		it('should add the original to the new error if it is passed', function() {
+			var notFound = er.create('not-found');
+			var original = new Error('Such a standard error');
+			var result = notFound('', {}, original);
+			expect(result).to.deep.equal({
+				key: 'not-found',
+				message: '',
+				data: {},
+				original: original
+			});
+		});
 	});
 
 	describe('options', function() {
