@@ -24,6 +24,10 @@ module.exports = [
 		value: Infinity,
 		natural: 'Infinity'
 	},{
+		description: 'regex /^from-start-to-end$/g',
+		value: /^from-start-to-end$/g,
+		natural: '/^from-start-to-end$/g'
+	}, {
 		description: 'string "\\"h\\"ello \'w\'orld"',
 		value: '"h"ello \'w\'orld',
 		natural: '"\\"h\\"ello \'w\'orld"'
