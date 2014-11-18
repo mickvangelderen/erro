@@ -110,7 +110,7 @@ describe('erro', function() {
 			var result = new NotFoundError('No user with email address :user.email was found', { user: { email: 'mick@example.com' } });
 			expect(result).to.deep.equal({
 				name: 'NotFoundError',
-				key: 'not-found',
+				type: 'not-found',
 				message: 'No user with email address "mick@example.com" was found',
 				data: { user: { email: 'mick@example.com' }}
 			});
@@ -121,7 +121,7 @@ describe('erro', function() {
 			var result = new NotFoundError('', {}, original);
 			expect(result).to.deep.equal({
 				name: 'NotFoundError',
-				key: 'not-found',
+				type: 'not-found',
 				message: '',
 				data: {},
 				original: original
@@ -141,7 +141,7 @@ describe('erro', function() {
 			var result = new NotFoundError('No user with email address {user|email} was found', { user: { email: 'mick@example.com' } });
 			expect(result).to.deep.equal({
 				name: 'NotFoundError',
-				key: 'not-found',
+				type: 'not-found',
 				message: 'No user with email address "mick@example.com" was found',
 				data: { user: { email: 'mick@example.com' }}
 			});

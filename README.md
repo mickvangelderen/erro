@@ -1,6 +1,8 @@
 Erro
 ====
 
+Check the [migration guide](https://github.com/mickvangelderen/erro/blob/master/migration.md) if you are upgrading to a new major version. 
+
 Create `lib/erro.js` in your module with the following contents:
 
 ```js
