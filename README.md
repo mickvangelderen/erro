@@ -1,27 +1,34 @@
 Erro
 ====
 
-Create `lib/er.js` in your module with the following contents:
+Create `lib/erro.js` in your module with the following contents:
 
 ```js
-var erro = require('erro');
-
-/* This method allows multiple parts of a module use different error objects with different parsers */
-var er = module.exports = erro();
-
-/* er.create returns a function that creates error objects with the given key. Here we attach those functions to the er object but you can do whatever you want with them. */
-er.notFound = er.create('not-found');
-er.invalidArguments = er.create('invalid-arguments');
+var erro = module.exports = require('erro')({
+    // _keyLocator: /* regex to locate keys with in message string */
+    // _keySplitter: /* regex/string to split those keys with */
+});
 ```
 
-Include `lib/er.js` when you need to create error objects: 
+Create `lib/erro/invalid-argument.js` and other errors like so:
 
 ```js
-var er = require('./er');
+/* erro.create returns a constructor that creates error objects inheriting from Error with the given name and key. Here we attach those functions to the er object but you can do whatever you want with them. */
+module.exports = require('../erro').create('InvalidArgumentError', 'invalid-argument');
+```
+
+Instead of creating individual files for each error you may prefer to put them all in one file. It is up to you to decide, the constructors are standalone. 
+
+Include errors where you need them:
+
+```js
+var InvalidArgumentError = require('./errors/invalid-argument');
 
 module.exports = function divide(a, b) {
     if (b === 0) {
-        throw er.invalidArguments('Cannot divide :a by :b', { a: a, b: b };
+        var data = { numerator: a, denominator: b };
+        throw new InvalidArgumentError(
+            'Cannot divide :numerator by :denominator', data);
     }
     return a/b;
 }
@@ -30,13 +37,13 @@ module.exports = function divide(a, b) {
 You can use nested objects just as easily:
 
 ```js
-var er = require('./er');
+var NotFoundError = require('./errors/not-found');
 
 var user = { name: mick, id: 5 };
 
 module.exports = function getUserProperty(prop) {
     if (!(prop in user)) {
-        throw er.notFound('Property :p is not found for user :u.name', {
+        throw new NotFoundError('Property :p is not found for user :u.name', {
             p: prop, u: user
         });
     }

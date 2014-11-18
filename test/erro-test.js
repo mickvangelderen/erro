@@ -10,8 +10,13 @@ describe('erro', function() {
 		var values = require('./values-helper');
 
 		values.forEach(function(valueObject) {
+			var val = valueObject.value;
 			it('should escape ' + valueObject.description + ' properly', function() {
-				expect(er.prepare(valueObject.value)).to.equal(valueObject.natural);
+				if (val !== val) { // only holds for NaN
+					expect(er._prepare(valueObject.value) + '').to.equal('NaN');
+				} else {
+					expect(er._prepare(valueObject.value)).to.equal(valueObject.natural);
+				}
 			});
 		});
 	});
@@ -34,52 +39,77 @@ describe('erro', function() {
 		});
 
 		it('should extract a single depth key from an object', function() {
-			expect(er.extract('title', book)).to.deep.equal({ found: true, value: 'My Book' });
+			expect(er._extract('title', book)).to.equal('My Book');
 		});
 
 		it('should extract a nested key from an object', function() {
-			expect(er.extract('1.2', book)).to.deep.equal({ found: true, value: 'Paragraph 1.2' });
+			expect(er._extract('1.2', book)).to.equal('Paragraph 1.2');
 		});
 
 		it('should return the data if data is not an object', function() {
-			expect(er.extract('1.2', null)).to.deep.equal({ found: false, value: null });
+			expect(function() {
+				er._extract('1.2', null)
+			}).to.throw();
 		});
 
-		it('should the deepest value that the key can reach', function() {
-			expect(er.extract('1.3', book)).to.deep.equal({ found: false, value: book[1] });
-			expect(er.extract('2.1.2', book)).to.deep.equal({ found: false, value: 'Paragraph 2.1'});
+		it('should throw when quering a key not present in a sub object', function() {
+			expect(function() {
+				er._extract('1.3', book);
+			}).to.throw();
+		});
+
+		it('should throw when quering a key in a non object', function() {
+			expect(function() {
+				er._extract('2.1.2', book);
+			}).to.throw();
 		});
 	});
 
 	describe('interpolate', function() {
 		it('should return an empty string when passing no arguments', function() {
-			expect(er.interpolate('')).to.equal('');
+			expect(er._interpolate('')).to.equal('');
 		});
 
 		it('should return the same string when passing an unformatted format string', function() {
-			expect(er.interpolate('Unformatted format string')).to.equal('Unformatted format string');
+			expect(er._interpolate('Unformatted format string')).to.equal('Unformatted format string');
 		});
 
 		it('should replace :key with data.key', function() {
-			expect(er.interpolate('Hello :thing!', { thing: 'world' })).to.equal('Hello "world"!');
+			expect(er._interpolate('Hello :thing!', { thing: 'world' })).to.equal('Hello "world"!');
+		});
+
+		it('should replace nested :key.subkey with data.key.subkey', function() {
+			expect(er._interpolate('Hello :thing.subthing!', { thing: { subthing: 'world' } })).to.equal('Hello "world"!');
 		});
 
 		it('should leave a :key alone when the key is not completely in the data', function() {
-			expect(er.interpolate(':a', null)).to.equal(':a');
-			expect(er.interpolate(':a', { b: 'b' })).to.equal(':a');
-			expect(er.interpolate(':a.b', { a: {} })).to.equal(':a.b');
+			expect(er._interpolate(':a', null)).to.equal(':a');
+			expect(er._interpolate(':a', { b: 'b' })).to.equal(':a');
+			expect(er._interpolate(':a.b', { a: {} })).to.equal(':a.b');
 		});
 	});
 
 	describe('create', function() {
-		it('should return a function that returns an object with the given key and an interpolated message and data', function() {
+
+		var NotFoundError;
+
+		beforeEach(function() {
+			NotFoundError = er.create('NotFoundError', 'not-found');
+		});
+
+		it('should be a function', function() {
 			expect(er.create).to.be.a('function');
+		});
 
-			var notFound = er.create('not-found');
-			expect(notFound).to.be.a('function');
+		it('should create a constructor that inherits from Error', function() {
+			expect(NotFoundError).to.be.a('function');
+			expect(new NotFoundError('msg')).to.be.an.instanceOf(Error);
+		});
 
-			var result = notFound('No user with email address :user.email was found', { user: { email: 'mick@example.com' } });
+		it('should return a constructor that creates an error object given name and key and an interpolated message and data', function() {
+			var result = new NotFoundError('No user with email address :user.email was found', { user: { email: 'mick@example.com' } });
 			expect(result).to.deep.equal({
+				name: 'NotFoundError',
 				key: 'not-found',
 				message: 'No user with email address "mick@example.com" was found',
 				data: { user: { email: 'mick@example.com' }}
@@ -87,10 +117,10 @@ describe('erro', function() {
 		});
 
 		it('should add the original to the new error if it is passed', function() {
-			var notFound = er.create('not-found');
 			var original = new Error('Such a standard error');
-			var result = notFound('', {}, original);
+			var result = new NotFoundError('', {}, original);
 			expect(result).to.deep.equal({
+				name: 'NotFoundError',
 				key: 'not-found',
 				message: '',
 				data: {},
@@ -102,14 +132,15 @@ describe('erro', function() {
 	describe('options', function() {
 		it('should allow me to set the key format', function() {
 			er = erro({
-				keyLocator: /\{([_\w][_\w\d]*(\|[_\w][_\w\d]*)*)\}/g,
+				keyLocator: /\{([_\w][_\w\d]*(?:\|[_\w][_\w\d]*)*)\}/g,
 				keySplitter: '|'
 			});
 
-			var notFound = er.create('not-found');
+			var NotFoundError = er.create('NotFoundError', 'not-found');
 
-			var result = notFound('No user with email address {user|email} was found', { user: { email: 'mick@example.com' } });
+			var result = new NotFoundError('No user with email address {user|email} was found', { user: { email: 'mick@example.com' } });
 			expect(result).to.deep.equal({
+				name: 'NotFoundError',
 				key: 'not-found',
 				message: 'No user with email address "mick@example.com" was found',
 				data: { user: { email: 'mick@example.com' }}
