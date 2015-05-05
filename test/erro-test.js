@@ -104,12 +104,12 @@ describe('erro', function() {
 		it('should create a constructor that inherits from Error', function() {
 			expect(NotFoundError).to.be.a('function');
 			expect(new NotFoundError('msg')).to.be.an.instanceOf(Error);
+			expect(new NotFoundError('msg')).to.be.an.instanceOf(NotFoundError);
 		});
 
 		it('should return a constructor that creates an error object given name and key and an interpolated message and data', function() {
 			var result = new NotFoundError('No user with email address :user.email was found', { user: { email: 'mick@example.com' } });
 			expect(result).to.deep.equal({
-				name: 'NotFoundError',
 				type: 'not-found',
 				message: 'No user with email address "mick@example.com" was found',
 				data: { user: { email: 'mick@example.com' }}
@@ -120,12 +120,16 @@ describe('erro', function() {
 			var original = new Error('Such a standard error');
 			var result = new NotFoundError('', {}, original);
 			expect(result).to.deep.equal({
-				name: 'NotFoundError',
 				type: 'not-found',
 				message: '',
 				data: {},
 				original: original
 			});
+		});
+
+		it('should have a stack trace', function() {
+			var error = new NotFoundError('');
+			expect(error.stack).to.match(/^NotFoundError\n/);
 		});
 	});
 
@@ -140,7 +144,6 @@ describe('erro', function() {
 
 			var result = new NotFoundError('No user with email address {user|email} was found', { user: { email: 'mick@example.com' } });
 			expect(result).to.deep.equal({
-				name: 'NotFoundError',
 				type: 'not-found',
 				message: 'No user with email address "mick@example.com" was found',
 				data: { user: { email: 'mick@example.com' }}

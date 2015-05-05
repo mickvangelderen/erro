@@ -1,56 +1,130 @@
-Erro
+# Erro
 ====
 
 Check the [migration guide](https://github.com/mickvangelderen/erro/blob/master/migration.md) if you are upgrading to a new major version. 
 
-Create `lib/erro.js` in your module with the following contents:
+## Advantages
+
+Erro was created with two things in mind: usability and cross-computer usage. 
+
+### Detailed error messages
+
+Error classes created with erro allow you to write detailed error messages. You can provide a data object when constructing an error that is interpolated into the message. The interpolation supports nested objects. 
+
+### Error identification
+
+To check what type of error we are dealing with you should use the `error.type` property. Checking the type with `instanceof` or `error.name` should be avoided. `instanceof` will not work when you receive errors over a network. `error.name` is not necessarily unique. 
+
+`error.type` is a new property that should discriminate errors based on how to deal with them. For example, you can make a `InvalidEmailError` and an `InvalidUsernameError` but they will be handled in a very similar fashion. Both could have the type `invalid-field`. Errors with type `invalid-field` can then be expected to have properties `field` and `value` in the error data. It is up to you to properly design your errors to be consistent and helpful. 
+
+## How to use
+
+```bash
+npm install --save erro
+```
+
+### Initialize erro
+
+Erro allows you to tweak how the interpolation is performed. Therefore you should initialize erro as shown in the example below. 
 
 ```js
-var erro = module.exports = require('erro')({
+var erro = require('erro')({
     // _keyLocator: /* regex to locate keys with in message string */
     // _keySplitter: /* regex/string to split those keys with */
 });
 ```
 
-Create `lib/erro/invalid-argument.js` and other errors like so:
+### Create a class
+
+Creating a new error class is easy, just call `erro.create(name, type)`. 
 
 ```js
-/* erro.create returns a constructor that creates error objects inheriting from Error with the given name and key. Here we attach those functions to the er object but you can do whatever you want with them. */
-module.exports = require('../erro').create('InvalidArgumentError', 'invalid-argument');
+InvalidArgumentError = erro.create('InvalidArgumentError', 'invalid-argument');
 ```
 
-Instead of creating individual files for each error you may prefer to put them all in one file. It is up to you to decide, the constructors are standalone. 
+### Construct an error
 
-Include errors where you need them:
+Constructing an error with an interpolated message like so:
 
 ```js
-var InvalidArgumentError = require('./errors/invalid-argument');
-
-module.exports = function divide(a, b) {
+function divide(a, b) {
     if (b === 0) {
-        var data = { numerator: a, denominator: b };
         throw new InvalidArgumentError(
-            'Cannot divide :numerator by :denominator', data);
+            'Cannot divide :numerator by :denominator', 
+            { numerator: a, denominator: b }
+        );
     }
     return a/b;
 }
 ```
 
-You can use nested objects just as easily:
+Calling `divide(5, 0)` will throw an `InvalidArgumentError` with the following properties:
 
 ```js
-var NotFoundError = require('./errors/not-found');
-
-var user = { name: mick, id: 5 };
-
-module.exports = function getUserProperty(prop) {
-    if (!(prop in user)) {
-        throw new NotFoundError('Property :p is not found for user :u.name', {
-            p: prop, u: user
-        });
-    }
-    return user[prop];
+{
+    message: 'Cannot divide 5 by 0',
+    type: 'invalid-argument',
+    data: { numerator: 5, denominator: 0 }
 }
 ```
 
-You can also specify your own key pattern by providing options to the `erro` function. Check the [tests](https://github.com/mickvangelderen/erro/blob/master/test/erro-test.js) to see how this and other things work. 
+### Identifying an error
+
+As explained previously, erro suggests you use `error.type` to determine what to do when handling an error. The data from `error.data` can be used in the resulting action. 
+
+```js
+function onError(error) {
+    // Determine the type of error using error.type
+    if (error.type === 'invalid-field') {
+        // Do something using the error data as an example.
+        var f = getField(error.data.field);
+        f.setErrorMessage(error.message);
+    } else if (error.type === 'not-found') {
+        // ...
+    } else {
+        throw error;
+    }
+}
+```
+
+## Advanced usage
+
+### Nested data properties
+
+The default interpolation supports nested data objects:
+
+```js
+throw new InvalidArgumentError(
+    'Expected username :user.username to start with a letter', 
+    { user: { username: '0' } }
+);
+```
+
+### Your very own interpolation scheme
+
+You can define your own interpolation regex:
+
+```js
+erro({
+    keyLocator: /\{([_\w][_\w\d]*(?:\|[_\w][_\w\d]*)*)\}/g,
+    keySplitter: '|'
+});
+```
+
+Now you would write error messages like so:
+
+```js
+'Expected username {user|username} to start with a letter'
+```
+
+### Rewriting errors
+
+You can pass the original error when creating an error. Nothing special is done (yet) with the original, it is just attached to the error as `error.original` to provide extra information when debugging. 
+
+```js
+original = new InvalidArgumentError('');
+throw new MoreDetailedError('More detailed message', null, original);
+```
+
+### Other
+Check the [tests](https://github.com/mickvangelderen/erro/blob/master/test/erro-test.js) for more examples. 
