@@ -1,5 +1,4 @@
 # Erro
-====
 
 Check the [migration guide](https://github.com/mickvangelderen/erro/blob/master/migration.md) if you are upgrading to a new major version. 
 
@@ -39,7 +38,7 @@ var erro = require('erro')({
 Creating a new error class is easy, just call `erro.create(name, type)`. 
 
 ```js
-InvalidArgumentError = erro.create('InvalidArgumentError', 'invalid-argument');
+var InvalidArgumentError = erro.create('InvalidArgumentError', 'invalid-argument');
 ```
 
 ### Construct an error
