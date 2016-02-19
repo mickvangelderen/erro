@@ -73,5 +73,4 @@ There is nothing to configure anymore because message string interpolation is le
 
 ## Thanks
 
-This project uses [node-package-skeleton](https://github.com/mickvangelderen/node-package-skeleton) as a starting point for package development. 
->>>>>>> skeleton/master
+This project uses [node-package-skeleton](https://github.com/mickvangelderen/node-package-skeleton) as a starting point for package development.
