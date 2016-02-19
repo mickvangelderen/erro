@@ -1,32 +1,39 @@
-# Erro development guide
+# Development guide
+
+This guide is for people who want to modify erro.
 
 ## Setup
 
-* Make sure you have node and npm. 
-* Get a recent version of node and npm with `npm install -g n && n latest`.
-* Clone the repository.
+This project requires a recent version of `node`, `npm` and `git`. It also requires the commands  `rm` and `cp` to be available.
+
+* `git clone https://github.com/mickvangelderen/erro` to get the code.
+* `npm run setup` to configure git. 
+
+The `npm run setup` command installs git hooks so you don't forget to do  lint, test and sort configuration files when committing and to check your node version, update, dedupe and check for possible dependency updates when pulling. It also enables the `--follow-tags` flag for git so you don't forget to push tags. 
+
+## Code
+
+The code can be found in the [`src/`](src) directory. It will be transpiled to the `lib/` directory which is ignored by `git` but not by `npm`. 
 
 ## Scripts
 
 You can always inspect the `package.json` or issue `npm run` to view the available scripts but here is an overview:
 
-* `npm run build`: Transpile es2015 to node 5. 
-* `npm run check-node-version`: Check the node version.
-* `npm run clean`: Remove the transpiled code.
-* `npm run pull`: Pull code, check version and then install, dedupe, and check for outdated dependencies. 
-* `npm run push`: Test and push code and tags.
+* `npm run build`: Build this project.
+* `npm run check-node-version`: Check your node version.
+* `npm run clean`: Remove built assets.
+* `npm run lint`: Check code syntax and style. 
+* `npm run setup`: Run after cloning.
+* `npm run sort-configuration-files`: Sort files to minimize merge conflicts.
 * `npm run test`: Check version, lint and test.
 
-## Testing
+## Versioning and publishing
 
-* Tested with [mocha](http://mochajs.org/).
+Simply use [`npm version <version>`](https://docs.npmjs.com/cli/version) and [`npm publish`](https://docs.npmjs.com/cli/publish). 
+
+## Tools
+
 * Asserted with [must](https://www.npmjs.com/package/must).
-
-## Linting
-
 * Linted with [eslint](http://eslint.org/) and its recommended settings which I feel are good enough.
-* Parsed with [babel-eslint](https://www.npmjs.com/package/babel-eslint).
-
-## Transpiling
-
-* Transpiles ES2015 to node 5 compatible code using [babel](https://babeljs.io/).
+* Tested with [mocha](http://mochajs.org/).
+* Transpiled with [babel](https://babeljs.io/) from es2015 to node5. 

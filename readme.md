@@ -70,3 +70,8 @@ Version 3 of erro has been compiled for node 5. I could compile a browser versio
 ## Configuration
 
 There is nothing to configure anymore because message string interpolation is left to the user. 
+
+## Thanks
+
+This project uses [node-package-skeleton](https://github.com/mickvangelderen/node-package-skeleton) as a starting point for package development. 
+>>>>>>> skeleton/master
