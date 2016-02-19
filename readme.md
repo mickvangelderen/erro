@@ -65,7 +65,7 @@ try {
 
 ## Requirements
 
-Version 3 of erro has been compiled for node 5. I could compile a browser version but I need help with how to test erro in all common browsers. 
+Version 3 of erro has been compiled for node 4. I could compile a browser version but I need help with how to test erro in all common browsers. 
 
 ## Configuration
 
